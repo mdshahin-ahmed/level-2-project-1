@@ -44,18 +44,49 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-app.get("/", logger, (req: Request, res: Response) => {
-  console.log(req.params); // paramitter hishebe ja dibo ta aikhane pabo
-  console.log(req.query); // query er jonno ja dibo ta aikhane pabo
-
-  res.send("Hello world!");
-});
+app.get(
+  "/",
+  logger,
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.params); // paramitter hishebe ja dibo ta aikhane pabo
+    console.log(req.query); // query er jonno ja dibo ta aikhane pabo
+    try {
+      res.send(something);
+    } catch (error) {
+      // console.log(error);
+      // res.status(400).json({
+      //   success: false,
+      //   message: "Failed to get data",
+      // });
+      next(error);
+    }
+  }
+);
 
 app.post("/", logger, (req: Request, res: Response) => {
   console.log(req.body);
   res.json({
     message: "Successfully received data ",
   });
+});
+
+// route hodi match na kore
+// sob route er niche dite hobe
+app.all("*", (req: Request, res: Response) => {
+  res.status(400).json({
+    success: false,
+    message: "Route is not found",
+  });
+});
+
+// global error handler
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  if (error) {
+    res.status(400).json({
+      success: false,
+      message: "Something went wrong!",
+    });
+  }
 });
 
 export default app;
